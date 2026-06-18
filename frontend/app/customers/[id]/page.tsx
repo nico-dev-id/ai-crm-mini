@@ -39,12 +39,21 @@ export default function CustomerDetail() {
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [showDealForm, setShowDealForm] = useState<boolean>(false)
+  const [showEditForm, setShowEditForm] = useState<boolean>(false)
   const [analisis, setAnalisis] = useState<string>('')
   const [loadingAnalisis, setLoadingAnalisis] = useState<boolean>(false)
   const [dealForm, setDealForm] = useState({
     judul: '',
     nilai: 0,
     status: 'open',
+    catatan: ''
+  })
+  const [editForm, setEditForm] = useState({
+    nama: '',
+    email: '',
+    telepon: '',
+    perusahaan: '',
+    status: 'prospect',
     catatan: ''
   })
 
@@ -86,9 +95,37 @@ export default function CustomerDetail() {
     }
   }
 
+  const bukaEditForm = () => {
+    setEditForm({
+      nama: customer?.nama || '',
+      email: customer?.email || '',
+      telepon: customer?.telepon || '',
+      perusahaan: customer?.perusahaan || '',
+      status: customer?.status || 'prospect',
+      catatan: customer?.catatan || ''
+    })
+    setShowEditForm(true)
+  }
+
+  const simpanEdit = async () => {
+    if (!editForm.nama) return
+    const token = localStorage.getItem('token')
+    const res = await fetch(`${API}/customers/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(editForm)
+    })
+    if (res.ok) {
+      setShowEditForm(false)
+      ambilData(token!)
+    }
+  }
+
   const tambahDeal = async () => {
     if (!dealForm.judul) return
-
     const token = localStorage.getItem('token')
     const res = await fetch(`${API}/customers/${id}/deals`, {
       method: 'POST',
@@ -98,7 +135,6 @@ export default function CustomerDetail() {
       },
       body: JSON.stringify(dealForm)
     })
-
     if (res.ok) {
       setDealForm({ judul: '', nilai: 0, status: 'open', catatan: '' })
       setShowDealForm(false)
@@ -198,13 +234,21 @@ export default function CustomerDetail() {
                 </div>
               </div>
             </div>
-            <button
-              onClick={analisisAI}
-              disabled={loadingAnalisis}
-              className="bg-purple-500/20 text-purple-400 px-6 py-3 rounded-xl hover:bg-purple-500/30 transition font-medium disabled:opacity-50 flex items-center gap-2"
-            >
-              {loadingAnalisis ? '🤖 Menganalisis...' : '🤖 Analisis AI'}
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={bukaEditForm}
+                className="bg-slate-700 text-slate-300 px-6 py-3 rounded-xl hover:bg-slate-600 transition font-medium"
+              >
+                ✏️ Edit
+              </button>
+              <button
+                onClick={analisisAI}
+                disabled={loadingAnalisis}
+                className="bg-purple-500/20 text-purple-400 px-6 py-3 rounded-xl hover:bg-purple-500/30 transition font-medium disabled:opacity-50"
+              >
+                {loadingAnalisis ? '🤖 Menganalisis...' : '🤖 Analisis AI'}
+              </button>
+            </div>
           </div>
 
           {customer.catatan && (
@@ -214,18 +258,84 @@ export default function CustomerDetail() {
           )}
         </div>
 
+        {/* Edit Form */}
+        {showEditForm && (
+          <div className="bg-slate-800 border border-blue-500/30 rounded-2xl p-6 mb-6">
+            <h2 className="text-white font-bold mb-4">Edit Customer</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Nama lengkap *"
+                value={editForm.nama}
+                onChange={(e) => setEditForm({...editForm, nama: e.target.value})}
+                className="bg-slate-700 border border-slate-600 text-white p-3 rounded-lg focus:outline-none focus:border-blue-400 placeholder-slate-400"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                className="bg-slate-700 border border-slate-600 text-white p-3 rounded-lg focus:outline-none focus:border-blue-400 placeholder-slate-400"
+              />
+              <input
+                type="text"
+                placeholder="Nomor telepon"
+                value={editForm.telepon}
+                onChange={(e) => setEditForm({...editForm, telepon: e.target.value})}
+                className="bg-slate-700 border border-slate-600 text-white p-3 rounded-lg focus:outline-none focus:border-blue-400 placeholder-slate-400"
+              />
+              <input
+                type="text"
+                placeholder="Perusahaan"
+                value={editForm.perusahaan}
+                onChange={(e) => setEditForm({...editForm, perusahaan: e.target.value})}
+                className="bg-slate-700 border border-slate-600 text-white p-3 rounded-lg focus:outline-none focus:border-blue-400 placeholder-slate-400"
+              />
+              <select
+                value={editForm.status}
+                onChange={(e) => setEditForm({...editForm, status: e.target.value})}
+                className="bg-slate-700 border border-slate-600 text-white p-3 rounded-lg focus:outline-none focus:border-blue-400"
+              >
+                <option value="prospect">Prospect</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              <textarea
+                placeholder="Catatan"
+                value={editForm.catatan}
+                onChange={(e) => setEditForm({...editForm, catatan: e.target.value})}
+                className="bg-slate-700 border border-slate-600 text-white p-3 rounded-lg focus:outline-none focus:border-blue-400 placeholder-slate-400"
+                rows={1}
+              />
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={simpanEdit}
+                className="bg-blue-500 text-white px-6 py-2.5 rounded-lg hover:bg-blue-600 transition font-medium"
+              >
+                Simpan Perubahan
+              </button>
+              <button
+                onClick={() => setShowEditForm(false)}
+                className="bg-slate-700 text-slate-300 px-6 py-2.5 rounded-lg hover:bg-slate-600 transition"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* AI Analysis Result */}
         {analisis && (
           <div className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-6 mb-6">
-            <h2 className="text-purple-400 font-bold mb-3 flex items-center gap-2">
-              🤖 Analisis AI
-            </h2>
+            <h2 className="text-purple-400 font-bold mb-3">🤖 Analisis AI</h2>
             <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
               {analisis}
             </div>
           </div>
         )}
 
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
             <p className="text-slate-400 text-sm">Total Deals</p>
@@ -253,7 +363,6 @@ export default function CustomerDetail() {
             </button>
           </div>
 
-          {/* Deal Form */}
           {showDealForm && (
             <div className="bg-slate-700/50 rounded-xl p-4 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -297,7 +406,6 @@ export default function CustomerDetail() {
             </div>
           )}
 
-          {/* Deal List */}
           {customer.deals.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-slate-400">Belum ada deal. Tambahkan sekarang!</p>
