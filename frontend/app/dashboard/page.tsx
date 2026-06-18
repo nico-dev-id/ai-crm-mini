@@ -176,7 +176,7 @@ export default function Dashboard() {
               👥 Lihat Customers
             </a>
             <a
-              href="/customers/new"
+              href="/customers"
               className="bg-slate-700 text-white px-6 py-3 rounded-xl hover:bg-slate-600 transition font-medium"
             >
               ➕ Tambah Customer
