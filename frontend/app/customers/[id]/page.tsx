@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Navbar from '../../components/Navbar'
 
-const API = 'http://localhost:8000'
+const API = 'https://nico-dev-id-ai-crm-mini-api.hf.space'
 
 interface Deal {
   id: number

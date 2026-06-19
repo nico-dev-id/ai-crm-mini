@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import StatCard from '../components/StatCard'
 
-const API = 'http://localhost:8000'
+const API = 'https://nico-dev-id-ai-crm-mini-api.hf.space'
 
 interface DashboardData {
   total_customers: number

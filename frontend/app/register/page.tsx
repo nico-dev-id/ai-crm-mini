@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-const API = 'http://localhost:8000'
+const API = 'https://nico-dev-id-ai-crm-mini-api.hf.space'
 
 export default function Register() {
   const [nama, setNama] = useState<string>('')
